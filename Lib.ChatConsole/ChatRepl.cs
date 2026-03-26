@@ -16,6 +16,7 @@ public class ChatRepl
         _registry.Register(new TopKCommand());
         _registry.Register(new SeedCommand());
         _registry.Register(new ResetCommand());
+        _registry.Register(new MaxTokensCommand());
         _registry.Register(new QuitCommand());
         _registry.Register(new HelpCommand(_registry));
     }
@@ -37,6 +38,11 @@ public class ChatRepl
             Console.Write("\nКористувач> ");
             
             string input = Console.ReadLine();
+
+            if (input == null)
+            {
+                break;
+            }
 
             if (string.IsNullOrWhiteSpace(input))
             {

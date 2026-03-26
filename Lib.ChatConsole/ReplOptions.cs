@@ -4,6 +4,7 @@
     public int TopK { get; set; }
     public int? Seed { get; set; }
     public bool IsRunning { get; set; }
+    public int MaxTokens { get; set; }
 
     public ReplOptions()
     {
@@ -11,5 +12,6 @@
         TopK = 5;
         Seed = null;
         IsRunning = true;
+        MaxTokens = 50;
     }
 }

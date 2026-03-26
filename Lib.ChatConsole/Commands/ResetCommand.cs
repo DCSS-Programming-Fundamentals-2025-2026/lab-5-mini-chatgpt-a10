@@ -12,7 +12,18 @@ public class ResetCommand : IReplCommand
 
     public void Execute(string[] args, CommandExecutionContext context)
     {
-        Console.Clear();
+        context.Options.Temperature = 1.0f;
+        context.Options.TopK = 5;
+        context.Options.Seed = null;
+        context.Options.MaxTokens = 50;
+
+        try
+        {
+            Console.Clear();
+        }
+        catch (IOException)
+        {
+        }
         Console.WriteLine("Контекст скинуто. Можете почати нову розмову.");
     }
 }

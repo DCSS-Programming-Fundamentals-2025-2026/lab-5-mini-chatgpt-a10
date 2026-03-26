@@ -137,5 +137,91 @@ namespace Lib.ChatConsole.Tests
                 return "fake";
             }
         }
+
+        [Test]
+        public void ResetCommand_RestoresDefaultOptions()
+        {
+            ReplOptions options = new ReplOptions();
+            options.Temperature = 0.5f;
+            options.TopK = 5;
+            options.Seed = 42;
+            options.MaxTokens = 100;
+
+            BasicModel generator = new BasicModel();
+            CommandExecutionContext context = new CommandExecutionContext(options, generator);
+            ResetCommand command = new ResetCommand();
+            string[] args = new string[] { "/reset" };
+
+            command.Execute(args, context);
+
+            Assert.That(options.Temperature, Is.EqualTo(1.0f));
+            Assert.That(options.TopK, Is.EqualTo(5));
+            Assert.That(options.Seed, Is.Null);
+            Assert.That(options.MaxTokens, Is.EqualTo(50));
+        }
+
+        [Test]
+        public void CommandRegistry_GetCommand_ReturnsCorrectCommand()
+        {
+            CommandRegistry registry = new CommandRegistry();
+            TempCommand tempCmd = new TempCommand();
+            registry.Register(tempCmd);
+
+            IReplCommand foundCmd = registry.GetCommand("/temp");
+
+            Assert.That(foundCmd, Is.Not.Null);
+            Assert.That(foundCmd.Name, Is.EqualTo("/temp"));
+        }
+
+        [Test]
+        public void CommandRegistry_GetCommand_ReturnsNull()
+        {
+            CommandRegistry registry = new CommandRegistry();
+
+            IReplCommand foundCmd = registry.GetCommand("/ololololo");
+
+            Assert.That(foundCmd, Is.Null, "Реєстр має повертати null для неіснуючих команд!");
+        }
+
+        [Test]
+        public void MaxTokensCommand_UpdatesMaxTokens()
+        {
+            ReplOptions options = new ReplOptions();
+            options.MaxTokens = 50; 
+            
+            BasicModel generator = new BasicModel();
+            CommandExecutionContext context = new CommandExecutionContext(options, generator);
+            
+            MaxTokensCommand command = new MaxTokensCommand();
+            string[] args = new string[] { "/maxtokens", "200" };
+
+            command.Execute(args, context);
+
+            Assert.That(options.MaxTokens, Is.EqualTo(200));
+        }
+
+        [Test]
+        public void ChatRepl_GeneratesText_WhenPromptEntered()
+        {
+            BasicModel generator = new BasicModel();
+            ChatRepl chat = new ChatRepl(generator);
+            
+            StringReader simulatedInput = new StringReader("тест\n/quit\n");
+            StringWriter simulatedOutput = new StringWriter();
+            
+            Console.SetIn(simulatedInput);
+            Console.SetOut(simulatedOutput);
+
+            chat.Run(1.0f, 5, null);
+
+            string consoleOutput = simulatedOutput.ToString();
+            
+            Assert.That(consoleOutput, Does.Contain("Модель>"));
+
+            StreamReader standardIn = new StreamReader(Console.OpenStandardInput());
+            StreamWriter standardOut = new StreamWriter(Console.OpenStandardOutput());
+            Console.SetIn(standardIn);
+            Console.SetOut(standardOut);
+        }
     }
 }
